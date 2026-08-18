@@ -87,6 +87,41 @@ pm2 monit
 pm2 save && pm2 startup
 ```
 
+## Project binding
+
+`server-config.json` is generated per project in the Verify portal and carries a
+`config_token` — a signature naming the project the file belongs to.
+
+The server checks the file against that signature at startup and **refuses to
+start if it has been modified**. Download a fresh copy from the portal rather
+than editing the file by hand.
+
+To confirm which project an instance is serving:
+
+```sh
+curl http://localhost:8080/api/v1/config-info
+```
+
+```json
+{
+  "project_id": 42,
+  "template_name": "RUPP_BACHELOR",
+  "environment": "service.verify.gov.kh",
+  "config_hash": "9f2c…",
+  "bound": true
+}
+```
+
+`/api/v1/encrypt-document` returns `config_token` and `config_manifest` alongside
+the encrypted document. **Forward both with the rest of the response** when
+submitting the document — they confirm it was built with the config belonging to
+your API key, and it is rejected otherwise. Sending a document built from one
+project's config using another project's API key produces a certificate that can
+never be verified.
+
+Set `REQUIRE_CONFIG_BINDING=true` to refuse to start on a config that has no
+`config_token` at all.
+
 ## Development
 
 The server is written in TypeScript under `src/` and compiles to `dist/`.

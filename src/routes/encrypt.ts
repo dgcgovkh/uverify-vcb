@@ -83,6 +83,19 @@ function parseBody(body: EncryptBody): ValidatedRequest {
 	};
 }
 
+function configBinding(ctx: AppContext): Record<string, unknown> {
+	if (ctx.binding == null) return {};
+
+	return {
+		config_token: ctx.config.config_token,
+		config_manifest: {
+			project_id: ctx.binding.project_id,
+			document_store: ctx.config.template.issuers[0]?.documentStore,
+			template_url: (ctx.config.template.$template as { url?: string })?.url,
+		},
+	};
+}
+
 function forVersion(
 	version: ApiVersion,
 	value: object,
@@ -127,6 +140,7 @@ export async function encryptHandler(
 				),
 				type: documentKeyType,
 			},
+			...configBinding(ctx),
 			...createCustomUrl(ctx, documentData, key),
 		});
 		return;
@@ -142,6 +156,7 @@ export async function encryptHandler(
 		document_signature: forVersion(version, signature),
 		document_key: key,
 		encrypted_document: forVersion(version, parts),
+		...configBinding(ctx),
 		...createCustomUrl(ctx, documentData, key),
 	});
 }
