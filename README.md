@@ -1,3 +1,32 @@
+# uverify VCB — Verify Certificate Builder
+
+The partner-side half of uverify issuance. It encrypts a document, mints the
+document key, and renders the QR that carries the verification URL. It runs on
+the **issuing partner's** infrastructure, not on a uverify core — the document
+key is generated here and the core never has to hold it.
+
+Because partners run it themselves, this repository and its image are public.
+
+## Provenance
+
+Copied from [`dgcgovkh/document-encryption-server`](https://github.com/dgcgovkh/document-encryption-server)
+at `20f4b91` (v2.0.0, 2026-08-17), with its history intact. There is **no
+upstream remote and no tracking relationship** — the same severance
+[ADR 0019](https://github.com/chantysothy/dgc-uverify-kb/blob/main/docs/adr/0019-the-fork-is-severed-not-tracked.md)
+applies to `uverify-core`, and for the same reason: a channel nobody pulls from
+is a belief in a safety net, not a safety net.
+
+The practical consequence is the same one that ADR names plainly. **Fixes made
+to `document-encryption-server` will not arrive here.** Watching it is a
+deliberate practice or it does not happen.
+
+## Compatibility
+
+The QR compositing maths here is byte-identical to `shared/graphics.js` in
+`uverify-core`, so a frame swapped in one place renders the same in the other.
+`test/fixtures/oa-encryption-vectors.json` pins the OpenAttestation wire format,
+so documents encrypted by earlier releases keep decrypting.
+
 ## How to Install
 
 ### Using Docker
@@ -5,13 +34,13 @@
 Pull the latest docker image
 
 ```bash
-docker pull ghcr.io/dgcgovkh/document-encryption-server:latest
+docker pull ghcr.io/dgcgovkh/uverify-vcb:latest
 ```
 
 Run the docker container
 
 ```bash
-docker run -d -p 8080:80 --restart unless-stopped -v ./<server-config-file>:/app/server-config.json ghcr.io/dgcgovkh/document-encryption-server:latest
+docker run -d -p 8080:80 --restart unless-stopped -v ./<server-config-file>:/app/server-config.json ghcr.io/dgcgovkh/uverify-vcb:latest
 ```
 
 ### Non-Docker
@@ -25,8 +54,8 @@ Requirements:
 
 ```bash
 # Clone, install dependencies and build
-git clone https://github.com/dgcgovkh/document-encryption-server.git
-cd document-encryption-server
+git clone https://github.com/dgcgovkh/uverify-vcb.git
+cd uverify-vcb
 npm install
 npm run build
 ```
@@ -43,7 +72,7 @@ echo "PORT=8080" >> .env
 npm start
 
 # (Recommended) Option 2. Run in the background using PM2
-pm2 start dist/server.mjs --name document-encryption
+pm2 start dist/server.mjs --name uverify-vcb
 ```
 
 Document-encryption is now running on http://localhost:8080
