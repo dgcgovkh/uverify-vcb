@@ -68,9 +68,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          # amd64 only. This job proves the Dockerfile still builds; it never
+          # pushes. arm64 here costs ~20 min because the Dockerfile runs `npm ci`
+          # twice under QEMU emulation, and it catches nothing amd64 misses.
+          # The published manifest stays multi-arch - see build_image.yml.
           push: false
-          platforms: linux/amd64,linux/arm64
-          tags: document-encryption-server:ci
+          platforms: linux/amd64
+          tags: uverify-vcb:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
