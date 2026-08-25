@@ -90,11 +90,18 @@ pm2 save && pm2 startup
 ## Project binding
 
 `server-config.json` is generated per project in the Verify portal and carries a
-`config_token` — a signature naming the project the file belongs to.
+`config_token` — a signed claim naming the project the file belongs to.
 
-The server checks the file against that signature at startup and **refuses to
-start if it has been modified**. Download a fresh copy from the portal rather
-than editing the file by hand.
+At startup the server reads the project and the config hash out of that token
+and compares the hash against the file it loaded, **refusing to start if the two
+disagree**. Download a fresh copy from the portal rather than editing the file by
+hand.
+
+**This start-up check does not verify the token's signature**, so it catches an
+edited config, not a forged one — the claims are read, not authenticated. The
+signature is verified on submission, where it is load-bearing. What this buys you
+is a loud, early failure on the box where the mistake was made, instead of a
+certificate that turns out to be unverifiable much later.
 
 To confirm which project an instance is serving:
 
@@ -106,7 +113,7 @@ curl http://localhost:8080/api/v1/config-info
 {
   "project_id": 42,
   "template_name": "RUPP_BACHELOR",
-  "environment": "service.verify.gov.kh",
+  "environment": "service.example-verify.gov",
   "config_hash": "9f2c…",
   "bound": true
 }
