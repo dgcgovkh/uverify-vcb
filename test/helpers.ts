@@ -17,6 +17,7 @@ export interface TestResponse {
 }
 
 export interface TestServer {
+	get(path: string): Promise<TestResponse>;
 	post(path: string, body: unknown): Promise<TestResponse>;
 	postRaw(
 		path: string,
@@ -49,6 +50,7 @@ export async function startServer(
 	}
 
 	return {
+		get: (path) => send(path, { method: "GET" }),
 		post: (path, body) =>
 			send(path, {
 				method: "POST",

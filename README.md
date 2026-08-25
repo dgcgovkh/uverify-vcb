@@ -87,6 +87,48 @@ pm2 monit
 pm2 save && pm2 startup
 ```
 
+## Project binding
+
+`server-config.json` is generated per project in the Verify portal and carries a
+`config_token` — a signed claim naming the project the file belongs to.
+
+At startup the server reads the project and the config hash out of that token
+and compares the hash against the file it loaded, **refusing to start if the two
+disagree**. Download a fresh copy from the portal rather than editing the file by
+hand.
+
+**This start-up check does not verify the token's signature**, so it catches an
+edited config, not a forged one — the claims are read, not authenticated. The
+signature is verified on submission, where it is load-bearing. What this buys you
+is a loud, early failure on the box where the mistake was made, instead of a
+certificate that turns out to be unverifiable much later.
+
+To confirm which project an instance is serving:
+
+```sh
+curl http://localhost:8080/api/v1/config-info
+```
+
+```json
+{
+  "project_id": 42,
+  "template_name": "RUPP_BACHELOR",
+  "environment": "service.example-verify.gov",
+  "config_hash": "9f2c…",
+  "bound": true
+}
+```
+
+`/api/v1/encrypt-document` returns `config_token` and `config_manifest` alongside
+the encrypted document. **Forward both with the rest of the response** when
+submitting the document — they confirm it was built with the config belonging to
+your API key, and it is rejected otherwise. Sending a document built from one
+project's config using another project's API key produces a certificate that can
+never be verified.
+
+Set `REQUIRE_CONFIG_BINDING=true` to refuse to start on a config that has no
+`config_token` at all.
+
 ## Development
 
 The server is written in TypeScript under `src/` and compiles to `dist/`.

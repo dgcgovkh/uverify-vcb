@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import helmet from "helmet";
 import { asyncHandler, errorHandler } from "./errors.js";
+import { configInfoHandler } from "./routes/config-info.js";
 import { decryptHandler } from "./routes/decrypt.js";
 import { encryptHandler } from "./routes/encrypt.js";
 import { qrcodeHandler } from "./routes/qrcode.js";
@@ -32,6 +33,8 @@ export function createApp(ctx: AppContext): Express {
 		"/api/qrcode",
 		asyncHandler((req, res) => qrcodeHandler(ctx, req, res)),
 	);
+
+	app.get("/api/v1/config-info", (req, res) => configInfoHandler(ctx, req, res));
 
 	app.post(
 		"/api/v1/encrypt-document",
