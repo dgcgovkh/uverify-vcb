@@ -113,7 +113,23 @@ describe("config binding at startup", () => {
 		).rejects.toThrow(/malformed/);
 	});
 
-	it("still loads an unsigned config", async () => {
+	it("refuses an unsigned config by default", async () => {
+		// The default, asserted directly. test/setup.ts opts the rest of the
+		// suite out; this case restores it so the shipped behaviour is covered.
+		const previous = process.env.REQUIRE_CONFIG_BINDING;
+		process.env.REQUIRE_CONFIG_BINDING = undefined;
+		delete process.env.REQUIRE_CONFIG_BINDING;
+
+		try {
+			await expect(loadContext(await writeConfig(base()))).rejects.toThrow(
+				/config_token/,
+			);
+		} finally {
+			process.env.REQUIRE_CONFIG_BINDING = previous;
+		}
+	});
+
+	it("loads an unsigned config when binding is explicitly not required", async () => {
 		const ctx = await loadContext(await writeConfig(base()));
 
 		expect(ctx.binding).toBeNull();

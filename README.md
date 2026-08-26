@@ -126,8 +126,10 @@ your API key, and it is rejected otherwise. Sending a document built from one
 project's config using another project's API key produces a certificate that can
 never be verified.
 
-Set `REQUIRE_CONFIG_BINDING=true` to refuse to start on a config that has no
-`config_token` at all.
+**Binding is required by default.** A config with no `config_token` is refused
+at startup: download a fresh copy from the portal. `REQUIRE_CONFIG_BINDING=false`
+is the escape hatch and has to be typed out - it exists for local development and
+for an instance deliberately left unbound, not for a production deployment.
 
 ## Development
 

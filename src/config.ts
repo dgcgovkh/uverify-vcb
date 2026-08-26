@@ -124,9 +124,16 @@ export async function loadContext(
 
 	const binding = readBinding(config);
 
-	if (binding == null && process.env.REQUIRE_CONFIG_BINDING === "true") {
+	// On by default. An unbound config is one a partner can submit against the
+	// wrong project, and neither side notices until a certificate exists that
+	// cannot be verified. Requiring it is what uverify means by "bound".
+	//
+	// REQUIRE_CONFIG_BINDING=false is the escape hatch, and it has to be typed
+	// out. It exists for local development and for partners still on an older
+	// config; it is not something a production deployment should carry.
+	if (binding == null && process.env.REQUIRE_CONFIG_BINDING !== "false") {
 		throw new Error(
-			`${CONFIG_FILE} has no "config_token" — download a fresh copy from the Verify portal`,
+			`${CONFIG_FILE} has no "config_token" - download a fresh copy from the Verify portal, or set REQUIRE_CONFIG_BINDING=false if this instance is deliberately unbound`,
 		);
 	}
 
